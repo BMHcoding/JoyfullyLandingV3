@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joyfully — The Wellness App That Grows With You</title>
+<meta name="description" content="A daily wellness ritual companion for Apple Watch. Your sun grows with every step. Your fog clears with every ritual. Coming soon.">
+<meta property="og:title" content="Joyfully — The Wellness App That Grows With You">
+<meta property="og:description" content="Watch your sun grow brighter every day. Morning rituals, grounding, sleep tracking, spa logging & smart supplements — all from your wrist.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap');
+
+:root {
+  --gold: #F5C842;
+  --amber: #E8943A;
+  --rose: #E89AA8;
+  --sky: #A8C8E8;
+  --sage: #A8E0B0;
+  --deep: #05070E;
+  --navy: #080E1C;
+  --panel: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.07);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+
+body {
+  background: var(--deep);
+  font-family: 'Jost', sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── Custom cursor ── */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 9999; transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(245,200,66,0.4);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 9998; transform: translate(-50%,-50%);
+  transition: transform 0.18s ease-out, width 0.3s, height 0.3s, opacity 0.3s;
+}
+.cursor.hovering { width:14px; height:14px; }
+.cursor-ring.hovering { width:48px; height:48px; border-color:rgba(245,200,66,0.25); }
+
+/* ── Ambient background ── */
+.bg-ambient {
+  position: fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,200,66,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 80%, rgba(232,148,58,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 10% 50%, rgba(168,200,232,0.03) 0%, transparent 50%);
+}
+
+/* ════════════════════════════
+   NAV
+════════════════════════════ */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 100;
+  padding: 22px 48px;
+  display: flex; align-items:center; justify-content:space-between;
+  transition: background 0.4s, padding 0.4s;
+}
+nav.scrolled {
+  background: rgba(5,7,14,0.85);
+  backdrop-filter: blur(20px);
+  padding: 14px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight:300; letter-spacing:0.1em;
+  background: linear-gradient(135deg, #F5C842, #E8943A);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-links {
+  display: flex; gap:36px; list-style:none;
+}
+.nav-links a {
+  font-size: 12px; font-weight:300; letter-spacing:0.15em;
+  text-transform:uppercase; color:rgba(255,255,255,0.5);
+  text-decoration:none; transition:color 0.3s;
+}
+.nav-links a:hover { color:#fff; }
+.nav-cta {
+  font-size: 11px; font-weight:400; letter-spacing:0.15em;
+  text-transform:uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(245,200,66,0.35);
+  padding: 9px 22px; border-radius:30px;
+  text-decoration:none;
+  background: rgba(245,200,66,0.06);
+  transition: all 0.3s;
+}
+.nav-cta:hover { background:rgba(245,200,66,0.14); border-color:rgba(245,200,66,0.6); }
+@media(max-width:768px) {
+  nav { padding:18px 20px; }
+  nav.scrolled { padding:12px 20px; }
+  .nav-links { display:none; }
+}
+
+/* ════════════════════════════
+   HERO
+════════════════════════════ */
+.hero {
+  position: relative; min-height:100vh;
+  display: flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden; z-index:1;
+  padding: 120px 24px 80px;
+}
+
+/* Big atmospheric sun */
+.hero-sun-bg {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(245,200,66,0.09) 0%, rgba(232,148,58,0.04) 40%, transparent 70%);
+  top:50%; left:50%;
+  transform:translate(-50%,-52%);
+  animation: heroSunBreath 8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes heroSunBreath {
+  0%,100%{transform:translate(-50%,-52%) scale(1); opacity:0.7}
+  50%{transform:translate(-50%,-52%) scale(1.08); opacity:1}
+}
+
+.hero-sun-core {
+  position:absolute;
+  width:120px; height:120px;
+  border-radius:50%;
+  background: radial-gradient(circle at 35% 33%, #FFFDE0, #F5C842 38%, #E8943A 72%, #C86020);
+  top:50%; left:50%;
+  transform:translate(-50%,-160%);
+  box-shadow:
+    0 0 40px 16px rgba(245,200,66,0.45),
+    0 0 100px 40px rgba(232,148,58,0.22),
+    0 0 200px 80px rgba(245,180,60,0.1);
+  animation: sunCorePulse 5s ease-in-out infinite;
+}
+@keyframes sunCorePulse {
+  0%,100%{box-shadow:0 0 40px 16px rgba(245,200,66,0.45),0 0 100px 40px rgba(232,148,58,0.22),0 0 200px 80px rgba(245,180,60,0.1)}
+  50%{box-shadow:0 0 55px 24px rgba(245,200,66,0.6),0 0 130px 55px rgba(232,148,58,0.3),0 0 260px 110px rgba(245,180,60,0.14)}
+}
+
+/* Rays */
+.hero-rays {
+  position:absolute;
+  top:50%; left:50%;
+  width:0; height:0;
+  animation:heroRaysRotate 60s linear infinite;
+}
+@keyframes heroRaysRotate { to{transform:rotate(360deg)} }
+.hero-ray {
+  position:absolute;
+  background:linear-gradient(to top, rgba(245,200,66,0.28), transparent);
+  border-radius:2px;
+  transform-origin:bottom center;
+}
+
+/* Fog over hero */
+.hero-fog {
+  position:absolute; bottom:0; left:0; right:0;
+  height:45%;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    rgba(140,175,215,0.06) 40%,
+    rgba(160,195,230,0.12) 70%,
+    rgba(175,210,240,0.18) 100%);
+  pointer-events:none;
+  animation: fogDrift 12s ease-in-out infinite alternate;
+}
+@keyframes fogDrift { 0%{opacity:0.6;transform:translateY(0)} 100%{opacity:1;transform:translateY(-8px)} }
+
+/* Horizon line */
+.hero-horizon {
+  position:absolute; bottom:30%;
+  left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(245,200,66,0.15), transparent);
+}
+
+.hero-content {
+  position:relative; z-index:2;
+  text-align:center; max-width:780px;
+}
+
+.hero-eyebrow {
+  font-size:11px; font-weight:300; letter-spacing:0.45em;
+  text-transform:uppercase; color:var(--gold); opacity:0.75;
+  margin-bottom:20px;
+  animation: fadeUp 1s ease 0.2s both;
+}
+
+.hero-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(52px,8vw,100px);
+  font-weight:300; line-height:0.95; letter-spacing:-0.01em;
+  margin-bottom:28px;
+  animation: fadeUp 1s ease 0.35s both;
+}
+.hero-title em {
+  font-style:italic;
+  background:linear-gradient(135deg,#FFF5C0 0%,#F5C842 35%,#E8943A 65%,#F5C842 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.hero-sub {
+  font-size:clamp(15px,2vw,18px); font-weight:200; line-height:1.7;
+  color:rgba(255,255,255,0.55); max-width:540px; margin:0 auto 44px;
+  animation: fadeUp 1s ease 0.5s both;
+}
+
+.hero-actions {
+  display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+  animation: fadeUp 1s ease 0.65s both;
+}
+
+.btn-primary {
+  background:linear-gradient(135deg, rgba(245,200,66,0.18), rgba(232,148,58,0.12));
+  border:1px solid rgba(245,200,66,0.4);
+  color:var(--gold); font-family:'Jost',sans-serif;
+  font-size:12px; font-weight:400; letter-spacing:0.2em; text-transform:uppercase;
+  padding:16px 36px; border-radius:50px; text-decoration:none;
+  transition:all 0.35s; display:inline-block;
+}
+.btn-primary:hover {
+  background:linear-gradient(135deg, rgba(245,200,66,0.28), rgba(232,148,58,0.2));
+  border-color:rgba(245,200,66,0.7);
+  transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(245,200,66,0.15);
+}
+
+.btn-secondary {
+  background:transparent; border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.55); font-family:'Jost',sans-serif;
+  font-size:12px; font-weight:300; letter-spacing:0.2em; text-transform:uppercase;
+  padding:16px 36px; border-radius:50px; text-decoration:none;
+  transition:all 0.35s; display:inline-block;
+}
+.btn-secondary:hover { border-color:rgba(255,255,255,0.3); color:rgba(255,255,255,0.8); transform:translateY(-2px); }
+
+.hero-scroll-hint {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  opacity:0.3; animation:scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+.hero-scroll-hint span { font-size:9px; letter-spacing:0.3em; text-transform:uppercase; }
+.hero-scroll-hint svg { width:16px; height:16px; }
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ════════════════════════════
+   WATCH DEMO SECTION
+════════════════════════════ */
+.watch-section {
+  position:relative; z-index:1;
+  padding:120px 24px;
+  display:flex; flex-direction:column; align-items:center;
+  overflow:hidden;
+}
+
+.watch-section::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, var(--deep) 0%, var(--navy) 50%, var(--deep) 100%);
+}
+
+.section-label {
+  font-size:10px; letter-spacing:0.4em; text-transform:uppercase;
+  color:var(--gold); opacity:0.65; margin-bottom:16px;
+  position:relative;
+}
+.section-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(36px,5vw,58px); font-weight:300;
+  text-align:center; line-height:1.1; margin-bottom:16px;
+  position:relative;
+}
+.section-title em { font-style:italic; color:rgba(255,255,255,0.6); }
+.section-sub {
+  font-size:15px; font-weight:200; color:rgba(255,255,255,0.4);
+  text-align:center; max-width:480px; line-height:1.75;
+  margin-bottom:64px; position:relative;
+}
+
+.watch-demo-wrap {
+  position:relative; z-index:1;
+  display:flex; align-items:flex-start; gap:80px;
+  flex-wrap:wrap; justify-content:center;
+  max-width:960px; width:100%;
+}
+
+/* ── Watch shell ── */
+.watch-shell {
+  width:198px; height:242px; flex-shrink:0;
+  background:linear-gradient(160deg,#2E2E32,#1E1E22 40%,#141418);
+  border-radius:62px; position:relative;
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.09),
+    0 0 0 2.5px rgba(0,0,0,0.9),
+    0 30px 80px rgba(0,0,0,0.9),
+    0 0 60px rgba(245,200,66,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.watch-shell::before {
+  content:''; position:absolute; right:-5px; top:70px;
+  width:6px; height:40px;
+  background:linear-gradient(180deg,#3C3C40,#2C2C30);
+  border-radius:3px; box-shadow:1px 0 4px rgba(0,0,0,0.6);
+}
+.watch-shell::after {
+  content:''; position:absolute; right:-5px; top:120px;
+  width:6px; height:24px;
+  background:linear-gradient(180deg,#3C3C40,#2C2C30);
+  border-radius:3px; box-shadow:1px 0 4px rgba(0,0,0,0.6);
+}
+.watch-screen {
+  position:absolute; inset:14px;
+  border-radius:50px; overflow:hidden; background:#000;
+}
+
+/* ── Screens ── */
+.ws { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:flex-start; overflow:hidden; border-radius:50px; animation:wsIn 0.35s ease; }
+.ws.active { display:flex; }
+@keyframes wsIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+
+/* Home */
+#ws-home { background:linear-gradient(180deg,#080E1C 0%,#0C1830 50%,#121E38 100%); }
+.wh-time { position:absolute; top:13px; left:0; right:0; text-align:center; z-index:8; font-size:11px; font-weight:300; color:rgba(255,255,255,0.7); letter-spacing:0.04em; }
+.wh-dots { position:absolute; top:28px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:8; }
+.wd { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.15); transition:all 0.5s; }
+.wd.lit { background:var(--gold); box-shadow:0 0 7px var(--gold); }
+.wh-horizon { position:absolute; bottom:28%; left:0; right:0; height:70px; background:linear-gradient(180deg,transparent,rgba(245,180,60,0.28)); filter:blur(14px); z-index:2; pointer-events:none; }
+.wh-fog { position:absolute; inset:0; z-index:5; pointer-events:none; border-radius:50px; background:linear-gradient(180deg,rgba(150,180,215,0) 0%,rgba(175,205,230,0.65) 45%,rgba(195,220,242,0.9) 72%,rgba(208,228,248,0.96) 100%); transition:opacity 2.5s ease; }
+.wh-sun-wrap { position:absolute; z-index:3; bottom:22%; left:50%; transform:translateX(-50%); transition:all 1.8s cubic-bezier(0.34,1.56,0.64,1); }
+.wh-sun-core { border-radius:50%; background:radial-gradient(circle at 34% 32%,#FFFBE0 0%,#F5C842 38%,#E8943A 72%,#D06820 100%); animation:wsc 4.5s ease-in-out infinite; }
+@keyframes wsc { 0%,100%{box-shadow:0 0 18px 7px rgba(245,200,66,0.5),0 0 45px 18px rgba(232,148,58,0.28)} 50%{box-shadow:0 0 26px 12px rgba(245,200,66,0.65),0 0 60px 26px rgba(232,148,58,0.38)} }
+.wh-ray-ring { position:absolute; top:50%; left:50%; animation:wrs 32s linear infinite; transform-origin:0 0; }
+@keyframes wrs { to{transform:rotate(360deg) translate(-50%,-50%)} }
+.wh-ray { position:absolute; background:linear-gradient(to bottom,rgba(245,200,66,0.55),transparent); transform-origin:bottom center; border-radius:2px; }
+.wh-steps { position:absolute; bottom:9px; left:0; right:0; z-index:8; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.wh-stxt { font-size:9px; color:rgba(255,255,255,0.55); letter-spacing:0.08em; }
+.wh-sbar { width:88px; height:3px; background:rgba(255,255,255,0.12); border-radius:2px; overflow:hidden; }
+.wh-sfill { height:100%; border-radius:2px; transition:width 1.2s ease; background:linear-gradient(90deg,var(--gold),var(--amber)); }
+
+/* Smile */
+#ws-smile { background:linear-gradient(160deg,#08120A,#0E1C10); }
+.smb { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:9px; padding:14px; position:relative; z-index:2; }
+.smt { font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:300; color:var(--sage); letter-spacing:0.04em; }
+.smrw { position:relative; width:68px; height:68px; }
+.smrw svg { position:absolute; top:0; left:0; width:68px; height:68px; }
+.smrw svg circle { stroke:rgba(255,255,255,0.08); stroke-width:3; fill:none; }
+#smcp circle { stroke:var(--sage); stroke-width:3; fill:none; stroke-dasharray:188; stroke-dashoffset:188; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dashoffset 0.6s ease; }
+.smc { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:300; color:#fff; }
+.sms { font-size:8.5px; color:rgba(255,255,255,0.35); text-align:center; line-height:1.5; }
+.shbtn { background:rgba(168,224,168,0.12); border:1px solid rgba(168,224,168,0.3); color:var(--sage); font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; padding:7px 16px; border-radius:20px; cursor:pointer; font-family:'Jost',sans-serif; transition:all 0.2s; }
+.shbtn:hover { background:rgba(168,224,168,0.2); }
+
+/* Journal */
+#ws-journal { background:linear-gradient(160deg,#170D08,#211008); }
+.jb { display:flex; flex-direction:column; height:100%; padding:12px 11px; gap:7px; position:relative; z-index:2; }
+.jt { font-family:'Cormorant Garamond',serif; font-size:12px; color:#E8C89A; letter-spacing:0.08em; text-align:center; margin-top:5px; }
+.jp { font-size:9px; color:rgba(255,255,255,0.42); text-align:center; line-height:1.55; font-style:italic; }
+.jbox { flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(232,200,154,0.18); border-radius:11px; padding:8px; font-size:9px; color:rgba(255,255,255,0.65); line-height:1.65; display:flex; align-items:flex-start; }
+.jbtn { background:rgba(232,200,154,0.12); border:1px solid rgba(232,200,154,0.28); color:#E8C89A; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; padding:7px; border-radius:11px; cursor:pointer; text-align:center; font-family:'Jost',sans-serif; transition:all 0.2s; }
+.jbtn:hover { background:rgba(232,200,154,0.2); }
+.jcursor { animation:jblink 1.2s infinite; }
+@keyframes jblink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Grounding */
+#ws-ground { background:linear-gradient(160deg,#07111E,#0A1B2C); }
+.gb { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:9px; padding:14px; position:relative; z-index:2; }
+.gt { font-family:'Cormorant Garamond',serif; font-size:13px; color:var(--sky); letter-spacing:0.05em; }
+.grw { position:relative; width:78px; height:78px; }
+.grw svg { position:absolute; top:0; left:0; width:78px; height:78px; }
+.gic { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; }
+.gtm { font-size:25px; font-weight:300; color:#fff; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+.gsub { font-size:8px; color:rgba(255,255,255,0.35); letter-spacing:0.1em; text-transform:uppercase; }
+.guv { font-size:8.5px; color:rgba(168,200,232,0.7); text-align:center; line-height:1.5; margin-top:2px; }
+
+/* Sleep */
+#ws-sleep { background:linear-gradient(160deg,#010309,#03061A); }
+.slstars { position:absolute; inset:0; overflow:hidden; border-radius:50px; pointer-events:none; }
+.slstar { position:absolute; background:#fff; border-radius:50%; animation:sltwink var(--d) ease-in-out infinite; animation-delay:var(--dl); }
+@keyframes sltwink { 0%,100%{opacity:0.15} 50%{opacity:1} }
+.slb { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:7px; padding:14px; position:relative; z-index:2; }
+.slmw { position:relative; display:flex; align-items:center; justify-content:center; width:52px; height:52px; }
+.slmg { position:absolute; inset:-8px; border-radius:50%; background:rgba(168,200,232,0.12); filter:blur(10px); animation:slmgl 4s ease-in-out infinite; }
+@keyframes slmgl { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.15)} }
+.slme { font-size:32px; filter:drop-shadow(0 0 10px rgba(168,200,232,0.55)); }
+.slt { font-family:'Cormorant Garamond',serif; font-size:13px; color:var(--sky); }
+.slv { font-size:28px; font-weight:300; color:#fff; }
+.sll { font-size:8px; color:rgba(255,255,255,0.3); letter-spacing:0.14em; text-transform:uppercase; }
+.slbadge { background:rgba(0,20,60,0.7); border:1px solid rgba(168,200,232,0.28); border-radius:11px; padding:5px 12px; font-size:8.5px; color:var(--sky); letter-spacing:0.08em; }
+
+/* Spa */
+#ws-spa { background:linear-gradient(160deg,#080F1C,#071018); }
+.spab { display:flex; flex-direction:column; height:100%; padding:11px 9px; gap:6px; position:relative; z-index:2; }
+.spat { font-family:'Cormorant Garamond',serif; font-size:12px; color:var(--sky); text-align:center; letter-spacing:0.09em; margin-top:4px; }
+.spai { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:6px 9px; display:flex; align-items:center; gap:7px; cursor:pointer; transition:all 0.2s; }
+.spai:hover { background:rgba(255,255,255,0.08); }
+.spai.logged { border-color:rgba(168,200,232,0.38); background:rgba(168,200,232,0.07); }
+.spae { font-size:15px; }
+.spain { flex:1; }
+.span2 { font-size:9.5px; color:rgba(255,255,255,0.8); }
+.spac { font-size:8.5px; color:rgba(255,255,255,0.32); margin-top:1px; }
+.spachk { font-size:10px; color:var(--sky); min-width:12px; }
+
+/* Supps */
+#ws-supps { background:linear-gradient(160deg,#180C0E,#1E0A0F); }
+.supb { display:flex; flex-direction:column; height:100%; padding:9px; gap:5px; position:relative; z-index:2; overflow-y:auto; }
+.supt { font-family:'Cormorant Garamond',serif; font-size:12px; color:var(--rose); text-align:center; letter-spacing:0.07em; margin-top:4px; }
+.supc { background:rgba(255,255,255,0.04); border:1px solid rgba(232,154,168,0.13); border-radius:10px; padding:7px 9px; cursor:pointer; transition:all 0.2s; }
+.supc:hover { background:rgba(232,154,168,0.07); }
+.supto { display:flex; align-items:center; gap:5px; }
+.supe { font-size:13px; }
+.supn { font-size:9.5px; color:rgba(255,255,255,0.85); flex:1; }
+.supbdg { font-size:7.5px; padding:2px 5px; background:rgba(232,154,168,0.18); border-radius:7px; color:var(--rose); }
+.supr { font-size:8px; color:rgba(255,255,255,0.38); margin-top:3px; line-height:1.45; }
+.supshop { background:linear-gradient(135deg,rgba(232,154,168,0.18),rgba(232,148,58,0.12)); border:1px solid rgba(232,154,168,0.28); border-radius:11px; padding:6px; font-size:8.5px; color:var(--rose); text-align:center; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:'Jost',sans-serif; transition:all 0.2s; margin-top:3px; }
+.supshop:hover { background:rgba(232,154,168,0.25); }
+
+/* Nav bar */
+.wnav { position:absolute; bottom:0; left:0; right:0; height:27px; background:rgba(0,0,0,0.75); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; gap:9px; z-index:10; border-bottom-left-radius:50px; border-bottom-right-radius:50px; border-top:1px solid rgba(255,255,255,0.05); }
+.ndot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.18); cursor:pointer; transition:all 0.3s; }
+.ndot.on { background:var(--gold); box-shadow:0 0 7px var(--gold); }
+
+/* Watch screen tabs */
+.watch-screen-tabs {
+  display:flex; gap:8px; flex-wrap:wrap;
+  justify-content:center; margin-top:20px;
+  position:relative; z-index:1;
+}
+.wstab {
+  font-size:10px; letter-spacing:0.1em;
+  color:rgba(255,255,255,0.35); padding:5px 12px;
+  border:1px solid rgba(255,255,255,0.08); border-radius:20px;
+  cursor:pointer; transition:all 0.25s; font-family:'Jost',sans-serif;
+  background:transparent;
+}
+.wstab:hover { color:rgba(255,255,255,0.65); border-color:rgba(255,255,255,0.18); }
+.wstab.active { color:var(--gold); border-color:rgba(245,200,66,0.35); background:rgba(245,200,66,0.06); }
+
+/* Watch feature list */
+.watch-features {
+  flex:1; min-width:260px; max-width:380px;
+  display:flex; flex-direction:column; gap:20px;
+  padding-top:8px; position:relative; z-index:1;
+}
+.wf-item {
+  display:flex; gap:16px; align-items:flex-start;
+  opacity:0; transform:translateX(20px);
+  transition:all 0.5s ease;
+}
+.wf-item.visible { opacity:1; transform:translateX(0); }
+.wf-icon {
+  width:40px; height:40px; border-radius:12px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.wf-text h4 { font-size:14px; font-weight:400; color:rgba(255,255,255,0.85); margin-bottom:4px; }
+.wf-text p { font-size:12px; font-weight:200; color:rgba(255,255,255,0.4); line-height:1.65; }
+
+/* ════════════════════════════
+   FEATURES GRID
+════════════════════════════ */
+.features-section {
+  position:relative; z-index:1;
+  padding:120px 24px; max-width:1100px; margin:0 auto;
+}
+.features-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:16px; margin-top:64px;
+}
+.feat-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:24px; padding:32px 28px;
+  transition:all 0.4s ease;
+  opacity:0; transform:translateY(30px);
+}
+.feat-card.visible { opacity:1; transform:translateY(0); }
+.feat-card:hover {
+  border-color:rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);
+  transform:translateY(-4px);
+}
+.feat-card-icon {
+  width:52px; height:52px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; margin-bottom:20px;
+}
+.feat-card h3 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px; font-weight:400; margin-bottom:10px;
+  color:rgba(255,255,255,0.9);
+}
+.feat-card p {
+  font-size:13px; font-weight:200; color:rgba(255,255,255,0.45);
+  line-height:1.75;
+}
+
+/* ════════════════════════════
+   RITUAL SECTION
+════════════════════════════ */
+.ritual-section {
+  position:relative; z-index:1;
+  padding:120px 24px; overflow:hidden;
+}
+.ritual-section::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg,var(--deep),var(--navy),var(--deep));
+}
+.ritual-inner {
+  max-width:960px; margin:0 auto;
+  position:relative; z-index:1;
+}
+.ritual-steps {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:40px; margin-top:64px;
+}
+@media(max-width:640px){ .ritual-steps{grid-template-columns:1fr;} }
+.ritual-step {
+  display:flex; gap:20px; align-items:flex-start;
+  opacity:0; transform:translateY(20px);
+  transition:all 0.5s ease;
+}
+.ritual-step.visible { opacity:1; transform:translateY(0); }
+.rstep-num {
+  font-family:'Cormorant Garamond',serif;
+  font-size:48px; font-weight:300; line-height:1;
+  color:rgba(245,200,66,0.15); flex-shrink:0; width:48px;
+  text-align:right;
+}
+.rstep-content h3 {
+  font-size:16px; font-weight:400; margin-bottom:8px;
+  color:rgba(255,255,255,0.85);
+}
+.rstep-content p {
+  font-size:13px; font-weight:200;
+  color:rgba(255,255,255,0.4); line-height:1.7;
+}
+
+/* ════════════════════════════
+   WAITLIST
+════════════════════════════ */
+.waitlist-section {
+  position:relative; z-index:1;
+  padding:120px 24px;
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center;
+}
+
+.waitlist-glow {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(245,200,66,0.05) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+.waitlist-card {
+  position:relative; z-index:1;
+  background:rgba(245,200,66,0.04);
+  border:1px solid rgba(245,200,66,0.12);
+  border-radius:32px; padding:64px 48px;
+  max-width:580px; width:100%;
+}
+@media(max-width:560px){ .waitlist-card{padding:40px 24px;} }
+
+.waitlist-card h2 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(36px,5vw,52px); font-weight:300;
+  margin-bottom:16px; line-height:1.1;
+}
+.waitlist-card h2 em {
+  font-style:italic; color:var(--gold);
+}
+.waitlist-card p {
+  font-size:15px; font-weight:200; color:rgba(255,255,255,0.45);
+  line-height:1.7; margin-bottom:36px;
+}
+
+.waitlist-form {
+  display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+}
+.waitlist-input {
+  flex:1; min-width:200px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:50px; padding:14px 22px;
+  color:#fff; font-family:'Jost',sans-serif;
+  font-size:14px; font-weight:300;
+  outline:none; transition:border-color 0.3s;
+}
+.waitlist-input::placeholder { color:rgba(255,255,255,0.3); }
+.waitlist-input:focus { border-color:rgba(245,200,66,0.4); }
+.waitlist-btn {
+  background:linear-gradient(135deg,#F5C842,#E8943A);
+  border:none; border-radius:50px;
+  padding:14px 28px; color:#0A0800;
+  font-family:'Jost',sans-serif; font-size:13px; font-weight:500;
+  letter-spacing:0.1em; text-transform:uppercase;
+  cursor:pointer; transition:all 0.3s; white-space:nowrap;
+}
+.waitlist-btn:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(245,200,66,0.3); }
+.waitlist-btn:active { transform:translateY(0); }
+
+.waitlist-count {
+  margin-top:20px; font-size:12px; font-weight:300;
+  color:rgba(255,255,255,0.3); letter-spacing:0.05em;
+}
+.waitlist-count strong { color:var(--gold); font-weight:400; }
+
+.waitlist-success {
+  display:none; text-align:center; padding:20px 0;
+}
+.waitlist-success .check { font-size:48px; margin-bottom:12px; }
+.waitlist-success h3 { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); margin-bottom:8px; }
+.waitlist-success p { font-size:14px; font-weight:200; color:rgba(255,255,255,0.45); }
+
+/* ════════════════════════════
+   FOOTER
+════════════════════════════ */
+footer {
+  position:relative; z-index:1;
+  border-top:1px solid var(--border);
+  padding:40px 48px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:16px;
+}
+.footer-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px; font-weight:300; letter-spacing:0.1em;
+  background:linear-gradient(135deg,#F5C842,#E8943A);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.footer-links { display:flex; gap:28px; }
+.footer-links a { font-size:11px; letter-spacing:0.12em; color:rgba(255,255,255,0.3); text-decoration:none; transition:color 0.3s; }
+.footer-links a:hover { color:rgba(255,255,255,0.6); }
+.footer-copy { font-size:11px; color:rgba(255,255,255,0.2); }
+@media(max-width:640px){ footer{padding:28px 20px;} .footer-links{display:none;} }
+
+/* ════ TOAST ════ */
+.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:rgba(10,14,26,0.95); border:1px solid rgba(245,200,66,0.25); border-radius:30px; padding:10px 24px; font-size:12px; color:rgba(255,255,255,0.7); z-index:500; opacity:0; pointer-events:none; transition:opacity 0.3s; white-space:nowrap; }
+.toast.show { opacity:1; }
+
+/* ════════════════════════════
+   FOUNDER STORY
+════════════════════════════ */
+.founder-section {
+  position:relative; z-index:1;
+  padding:130px 24px;
+  overflow:hidden;
+}
+.founder-section::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, var(--deep) 0%, #0A0C16 50%, var(--deep) 100%);
+}
+.founder-inner {
+  max-width:1060px; margin:0 auto;
+  position:relative; z-index:1;
+}
+.founder-glow {
+  position:absolute;
+  width:700px; height:700px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(245,200,66,0.04) 0%, transparent 65%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.founder-eyebrow {
+  font-size:10px; letter-spacing:0.4em; text-transform:uppercase;
+  color:var(--gold); opacity:0.65;
+  text-align:center; margin-bottom:56px;
+}
+.founder-layout {
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:80px; align-items:start;
+}
+@media(max-width:860px){
+  .founder-layout { grid-template-columns:1fr; gap:56px; }
+}
+
+/* ── Sun visual ── */
+.founder-visual {
+  display:flex; flex-direction:column;
+  align-items:center; gap:40px;
+  position:sticky; top:120px;
+}
+@media(max-width:860px){ .founder-visual { position:static; } }
+
+.founder-sun-wrap {
+  position:relative; width:180px; height:180px;
+  display:flex; align-items:center; justify-content:center;
+}
+.founder-sun-ring {
+  position:absolute; border-radius:50%;
+  border:1px solid rgba(245,200,66,0.12);
+  animation:fsr 6s ease-in-out infinite;
+}
+.r1 { width:180px; height:180px; animation-delay:0s; }
+.r2 { width:130px; height:130px; animation-delay:0.4s; }
+.r3 { width:86px;  height:86px;  animation-delay:0.8s; }
+@keyframes fsr {
+  0%,100%{opacity:0.4;transform:scale(1)}
+  50%{opacity:0.9;transform:scale(1.04)}
+}
+.founder-sun-core {
+  width:58px; height:58px; border-radius:50%;
+  background:radial-gradient(circle at 34% 32%,#FFFBE0,#F5C842 38%,#E8943A 72%,#D06820);
+  box-shadow:
+    0 0 24px 10px rgba(245,200,66,0.45),
+    0 0 60px 24px rgba(232,148,58,0.22),
+    0 0 120px 48px rgba(245,180,60,0.1);
+  animation:fsc 5s ease-in-out infinite;
+}
+@keyframes fsc {
+  0%,100%{box-shadow:0 0 24px 10px rgba(245,200,66,0.45),0 0 60px 24px rgba(232,148,58,0.22),0 0 120px 48px rgba(245,180,60,0.1)}
+  50%{box-shadow:0 0 34px 16px rgba(245,200,66,0.62),0 0 80px 34px rgba(232,148,58,0.32),0 0 160px 65px rgba(245,180,60,0.14)}
+}
+
+/* Data points */
+.founder-data-points {
+  display:flex; flex-direction:column; gap:12px; width:100%;
+}
+.fdp {
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(245,200,66,0.1);
+  border-radius:14px; padding:14px 18px;
+  opacity:0; transform:translateX(-16px);
+  transition:all 0.5s ease;
+}
+.fdp.visible { opacity:1; transform:translateX(0); }
+.fdp1 { transition-delay:0.1s; }
+.fdp2 { transition-delay:0.25s; }
+.fdp3 { transition-delay:0.4s; }
+.fdp4 { transition-delay:0.55s; }
+.fdp-val {
+  font-size:14px; font-weight:400;
+  color:var(--gold); margin-bottom:3px;
+}
+.fdp-label {
+  font-size:11px; font-weight:200;
+  color:rgba(255,255,255,0.38); letter-spacing:0.03em;
+}
+
+/* ── Story text ── */
+.founder-text { display:flex; flex-direction:column; gap:0; }
+
+.founder-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(38px,4.5vw,56px); font-weight:300;
+  line-height:1.1; margin-bottom:36px;
+}
+.founder-title em {
+  font-style:italic;
+  background:linear-gradient(135deg,#FFF5C0,#F5C842 40%,#E8943A);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.founder-body { display:flex; flex-direction:column; gap:20px; }
+.founder-body p {
+  font-size:16px; font-weight:200; line-height:1.85;
+  color:rgba(255,255,255,0.62);
+}
+.founder-body p strong { color:rgba(255,255,255,0.88); font-weight:400; }
+.founder-body p em { font-style:italic; color:rgba(255,255,255,0.75); }
+
+.founder-pullquote {
+  display:flex; gap:20px; align-items:flex-start;
+  padding:24px 0; margin:8px 0;
+}
+.fpq-bar {
+  width:3px; flex-shrink:0; border-radius:3px; margin-top:4px;
+  background:linear-gradient(180deg, var(--gold), var(--amber));
+  min-height:60px;
+}
+.founder-pullquote p {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(20px,2.5vw,26px) !important;
+  font-weight:300 !important; font-style:italic;
+  line-height:1.5 !important;
+  color:rgba(255,255,255,0.85) !important;
+}
+
+.founder-sig {
+  margin-top:40px; display:flex; flex-direction:column; gap:10px;
+}
+.founder-sig-line {
+  width:48px; height:1px;
+  background:linear-gradient(90deg, var(--gold), transparent);
+}
+.founder-sig-name {
+  font-size:12px; font-weight:300; letter-spacing:0.2em;
+  text-transform:uppercase; color:rgba(255,255,255,0.3);
+}
+
+/* ════ SCROLL ANIMATIONS ════ */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="bg-ambient"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav id="mainNav">
+  <div class="nav-logo">Joyfully</div>
+  <ul class="nav-links">
+    <li><a href="#demo">The App</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#rituals">Rituals</a></li>
+    <li><a href="#story">Our Story</a></li>
+    <li><a href="#waitlist">Join Waitlist</a></li>
+  </ul>
+  <a href="#waitlist" class="nav-cta">Join Waitlist</a>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-sun-bg"></div>
+  <div class="hero-rays" id="heroRays"></div>
+  <div class="hero-sun-core"></div>
+  <div class="hero-fog"></div>
+  <div class="hero-horizon"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">Coming to Apple Watch</div>
+    <h1 class="hero-title">
+      Your wellness<br><em>grows with you</em>
+    </h1>
+    <p class="hero-sub">
+      A daily ritual companion that turns your morning practices into something beautiful — a sun that rises bigger every day, and fog that lifts with every intention you set.
+    </p>
+    <div class="hero-actions">
+      <a href="#waitlist" class="btn-primary">Join the Waitlist</a>
+      <a href="#demo" class="btn-secondary">See the App</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span>Scroll</span>
+    <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+  </div>
+</section>
+
+<!-- ═══════════ WATCH DEMO ═══════════ -->
+<section class="watch-section" id="demo">
+  <div class="section-label reveal">Interactive Prototype</div>
+  <h2 class="section-title reveal">Seven screens.<br><em>One ritual.</em></h2>
+  <p class="section-sub reveal">Tap the dots on the watch to explore every screen — or use the buttons below.</p>
+
+  <div class="watch-demo-wrap">
+    <!-- Watch -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;position:relative;z-index:1;">
+      <div class="watch-shell">
+        <div class="watch-screen">
+
+          <!-- HOME -->
+          <div class="ws active" id="ws-home">
+            <div class="wh-time" id="wClock">7:42</div>
+            <div class="wh-dots"><div class="wd" id="wd0"></div><div class="wd" id="wd1"></div><div class="wd" id="wd2"></div><div class="wd" id="wd3"></div></div>
+            <div class="wh-horizon"></div>
+            <div class="wh-fog" id="wFog"></div>
+            <div class="wh-sun-wrap" id="wSunWrap">
+              <div class="wh-ray-ring" id="wRayRing"></div>
+              <div class="wh-sun-core" id="wSunCore" style="width:60px;height:60px;"></div>
+            </div>
+            <div class="wh-steps">
+              <div class="wh-stxt" id="wStepTxt">4,280 / 10,000 steps</div>
+              <div class="wh-sbar"><div class="wh-sfill" id="wStepFill" style="width:43%"></div></div>
+            </div>
+            <div class="wnav"><div class="ndot on" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- SMILE -->
+          <div class="ws" id="ws-smile">
+            <div class="smb">
+              <div class="smt">Morning Smile</div>
+              <div class="smrw">
+                <svg viewBox="0 0 68 68"><circle cx="34" cy="34" r="30"/></svg>
+                <svg viewBox="0 0 68 68" id="smcp"><circle id="smcircle" cx="34" cy="34" r="30"/></svg>
+                <div class="smc" id="smctr">☀️</div>
+              </div>
+              <div class="sms">Smile for 10 seconds<br>then tap to confirm</div>
+              <button class="shbtn" id="smBtn" onclick="handleSmile()">Hold to Confirm ◉</button>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot on" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- JOURNAL -->
+          <div class="ws" id="ws-journal">
+            <div class="jb">
+              <div class="jt">Gratitude Journal</div>
+              <div class="jp">What are you grateful for this morning?</div>
+              <div class="jbox"><span style="color:rgba(255,255,255,0.32);font-style:italic;">I am grateful for the warmth of the sun...<span class="jcursor">|</span></span></div>
+              <div class="jbtn" onclick="saveJournal()">Save & Complete ✓</div>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot on" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- GROUNDING -->
+          <div class="ws" id="ws-ground">
+            <div class="gb">
+              <div class="gt">Morning Grounding</div>
+              <div class="grw">
+                <svg viewBox="0 0 78 78" fill="none">
+                  <circle cx="39" cy="39" r="34" stroke="rgba(245,200,66,0.1)" stroke-width="3"/>
+                  <circle cx="39" cy="39" r="34" stroke="url(#gg)" stroke-width="3" stroke-dasharray="213" stroke-dashoffset="80" stroke-linecap="round" transform="rotate(-90 39 39)" id="gCircle"/>
+                  <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#F5C842"/><stop offset="100%" stop-color="#E8943A"/></linearGradient></defs>
+                </svg>
+                <div class="gic">🌅</div>
+              </div>
+              <div class="gtm" id="gTimer">12:34</div>
+              <div class="gsub">of 20:00 goal</div>
+              <div class="guv">UV & ambient light detected<br>Haptic burst at completion</div>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot on" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- SLEEP -->
+          <div class="ws" id="ws-sleep">
+            <div class="slstars" id="slStars"></div>
+            <div class="slb">
+              <div class="slmw"><div class="slmg"></div><div class="slme">🌙</div></div>
+              <div class="slt">Sleep Darkness</div>
+              <div class="slv">0.3</div>
+              <div class="sll">lux detected</div>
+              <div class="slbadge">✓ Optimal darkness</div>
+              <div style="font-size:8.5px;color:rgba(255,255,255,0.28);text-align:center;margin-top:4px;line-height:1.55;">Last night: 7h 42m<br>Darkness score: 98%</div>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot on" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- SPA -->
+          <div class="ws" id="ws-spa">
+            <div class="spab">
+              <div class="spat">Weekly Spa Log</div>
+              <div class="spai" id="spi-s" onclick="tSpa('s')"><div class="spae">🔥</div><div class="spain"><div class="span2">Infrared Sauna</div><div class="spac" id="spc-s">2× this week</div></div><div class="spachk" id="spck-s"></div></div>
+              <div class="spai" id="spi-c" onclick="tSpa('c')"><div class="spae">❄️</div><div class="spain"><div class="span2">Cold Plunge</div><div class="spac" id="spc-c">1× this week</div></div><div class="spachk" id="spck-c"></div></div>
+              <div class="spai" id="spi-i" onclick="tSpa('i')"><div class="spae">💧</div><div class="spain"><div class="span2">IV Hydration</div><div class="spac" id="spc-i">0× this week</div></div><div class="spachk" id="spck-i"></div></div>
+              <div class="spai" id="spi-r" onclick="tSpa('r')"><div class="spae">🔴</div><div class="spain"><div class="span2">Red Light Therapy</div><div class="spac" id="spc-r">3× this week</div></div><div class="spachk" id="spck-r"></div></div>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot on" data-ws="spa"></div><div class="ndot" data-ws="supps"></div></div>
+          </div>
+
+          <!-- SUPPS -->
+          <div class="ws" id="ws-supps">
+            <div class="supb">
+              <div class="supt">Today's Picks</div>
+              <div class="supc"><div class="supto"><div class="supe">☀️</div><div class="supn">Vitamin D3 + K2</div><div class="supbdg">URGENT</div></div><div class="supr">Only 12 min grounding — D3 may be low</div></div>
+              <div class="supc"><div class="supto"><div class="supe">🧲</div><div class="supn">Magnesium Glycinate</div><div class="supbdg">TONIGHT</div></div><div class="supr">Sleep pattern shows cortisol — mag helps</div></div>
+              <div class="supc"><div class="supto"><div class="supe">💧</div><div class="supn">Electrolyte Blend</div><div class="supbdg">POST-SAUNA</div></div><div class="supr">2 saunas logged — replenish minerals</div></div>
+              <div class="supshop" onclick="showToast('Opening Joyfully Store…')">Shop on Joyfully Store ↗</div>
+            </div>
+            <div class="wnav"><div class="ndot" data-ws="home"></div><div class="ndot" data-ws="smile"></div><div class="ndot" data-ws="journal"></div><div class="ndot" data-ws="ground"></div><div class="ndot" data-ws="sleep"></div><div class="ndot" data-ws="spa"></div><div class="ndot on" data-ws="supps"></div></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Screen tabs -->
+      <div class="watch-screen-tabs">
+        <button class="wstab active" onclick="goScreen('home')">☀️ Home</button>
+        <button class="wstab" onclick="goScreen('smile')">😊 Smile</button>
+        <button class="wstab" onclick="goScreen('journal')">📖 Journal</button>
+        <button class="wstab" onclick="goScreen('ground')">🌅 Ground</button>
+        <button class="wstab" onclick="goScreen('sleep')">🌙 Sleep</button>
+        <button class="wstab" onclick="goScreen('spa')">✨ Spa</button>
+        <button class="wstab" onclick="goScreen('supps')">💊 Supps</button>
+      </div>
+    </div>
+
+    <!-- Feature list -->
+    <div class="watch-features" id="watchFeatures">
+      <div class="wf-item">
+        <div class="wf-icon" style="background:rgba(245,200,66,0.1);">☀️</div>
+        <div class="wf-text">
+          <h4>A sun that grows with you</h4>
+          <p>Your watch face sun expands from 20pt to 80pt as steps accumulate — a living symbol of how much you moved today.</p>
+        </div>
+      </div>
+      <div class="wf-item">
+        <div class="wf-icon" style="background:rgba(168,224,168,0.1);">🌫️</div>
+        <div class="wf-text">
+          <h4>Fog that clears ritual by ritual</h4>
+          <p>Each morning practice — smile, journal, grounding, sleep — lifts the fog a little more until your sun shines clear.</p>
+        </div>
+      </div>
+      <div class="wf-item">
+        <div class="wf-icon" style="background:rgba(168,200,232,0.1);">🌅</div>
+        <div class="wf-text">
+          <h4>Sunlight grounding timer</h4>
+          <p>Tracks outdoor light exposure in real time. A triple haptic burst rewards you at your 20-minute goal.</p>
+        </div>
+      </div>
+      <div class="wf-item">
+        <div class="wf-icon" style="background:rgba(232,154,168,0.1);">💊</div>
+        <div class="wf-text">
+          <h4>Smart supplement engine</h4>
+          <p>Reads your grounding, sleep, spa sessions and steps to suggest exactly what your body needs — linked to your Shopify store.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section class="features-section" id="features">
+  <div style="text-align:center;">
+    <div class="section-label reveal">Everything you need</div>
+    <h2 class="section-title reveal">Built for people who<br><em>take their wellness seriously</em></h2>
+    <p class="section-sub reveal" style="margin:16px auto 0;">Every feature is designed around one idea: your body knows what it needs. Joyfully just helps you listen.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(245,200,66,0.1);">☀️</div>
+      <h3>Morning Smile</h3>
+      <p>A 10-second haptic-guided smile ritual. Your watch counts down, vibrates with each tick, and bursts with joy when complete.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(232,200,154,0.1);">📖</div>
+      <h3>Gratitude Journal</h3>
+      <p>Voice-dictated entries right from your wrist, with a Digital Crown mood picker. Syncs automatically to the iPhone companion app.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(168,224,168,0.1);">🌅</div>
+      <h3>Sunlight Grounding</h3>
+      <p>Ambient light sensor tracks your outdoor time. Estimates UV index by time of day. Triple haptic burst at the 20-minute goal.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(168,200,232,0.1);">🌙</div>
+      <h3>Sleep Darkness</h3>
+      <p>Monitors ambient lux while you sleep and scores how dark your room truly was. Flags light disruption before it affects your recovery.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(100,160,220,0.1);">✨</div>
+      <h3>Spa & Biohacking Log</h3>
+      <p>Track sauna, cold plunge, IV hydration, and red light therapy sessions with duration. Weekly streaks and minutes per modality.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-card-icon" style="background:rgba(232,154,168,0.1);">💊</div>
+      <h3>Smart Supplements</h3>
+      <p>An AI rule engine reads your entire wellness picture and recommends exactly what to take — then takes you straight to your Shopify store.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ RITUALS ═══════════ -->
+<section class="ritual-section" id="rituals">
+  <div class="ritual-inner">
+    <div style="text-align:center;">
+      <div class="section-label reveal">The Practice</div>
+      <h2 class="section-title reveal">Your morning ritual,<br><em>made visible</em></h2>
+      <p class="section-sub reveal" style="margin:16px auto 0;">Four simple intentions. One clearing sun. Watch the fog lift in real time as you move through your morning.</p>
+    </div>
+    <div class="ritual-steps">
+      <div class="ritual-step">
+        <div class="rstep-num">01</div>
+        <div class="rstep-content">
+          <h3>Smile for 10 seconds ☀️</h3>
+          <p>Hold the haptic button and let a genuine smile wash over you for a full ten seconds. Your watch counts down with a gentle click each second.</p>
+        </div>
+      </div>
+      <div class="ritual-step">
+        <div class="rstep-num">02</div>
+        <div class="rstep-content">
+          <h3>Write with gratitude 📖</h3>
+          <p>Dictate a single grateful thought into your daily journal. A new prompt greets you every morning. Select your mood with the Digital Crown.</p>
+        </div>
+      </div>
+      <div class="ritual-step">
+        <div class="rstep-num">03</div>
+        <div class="rstep-content">
+          <h3>Stand in the sun 🌅</h3>
+          <p>Step outside and let Joyfully time your morning grounding. Twenty minutes of natural light — your watch rewards you with a triple haptic burst.</p>
+        </div>
+      </div>
+      <div class="ritual-step">
+        <div class="rstep-num">04</div>
+        <div class="rstep-content">
+          <h3>Sleep in the dark 🌙</h3>
+          <p>Your watch quietly monitors light levels as you sleep, scoring how truly dark your room was and flagging anything that might have disrupted your rest.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOUNDER STORY ═══════════ -->
+<section class="founder-section" id="story">
+  <div class="founder-inner">
+
+    <div class="founder-glow"></div>
+
+    <div class="founder-eyebrow reveal">The Story Behind Joyfully</div>
+
+    <div class="founder-layout">
+
+      <!-- Sun data visual -->
+      <div class="founder-visual reveal">
+        <div class="founder-sun-wrap">
+          <div class="founder-sun-ring r1"></div>
+          <div class="founder-sun-ring r2"></div>
+          <div class="founder-sun-ring r3"></div>
+          <div class="founder-sun-core"></div>
+        </div>
+        <div class="founder-data-points">
+          <div class="fdp fdp1">
+            <div class="fdp-val">17 yrs</div>
+            <div class="fdp-label">living with PANDAS</div>
+          </div>
+          <div class="fdp fdp2">
+            <div class="fdp-val">↓ First drop</div>
+            <div class="fdp-label">in Anti-D1R titer levels</div>
+          </div>
+          <div class="fdp fdp3">
+            <div class="fdp-val">Sleep · Skin · Mood</div>
+            <div class="fdp-label">measurable improvements</div>
+          </div>
+          <div class="fdp fdp4">
+            <div class="fdp-val">Apple Watch</div>
+            <div class="fdp-label">tracked every step of it</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Story text -->
+      <div class="founder-text">
+        <h2 class="founder-title reveal">
+          I built Joyfully<br>because I <em>needed</em> it.
+        </h2>
+
+        <div class="founder-body">
+          <p class="reveal">
+            A few years ago I was exhausted in a way that sleep couldn't fix. Burnt out, barely eating, my mood was low and my skin was dry. I was living with severe OCD and anxiety rooted in an autoimmune condition called <strong>PANDAS syndrome</strong> — a disorder that had been affecting my brain for seventeen years.
+          </p>
+          <p class="reveal">
+            I started a project called <em>Joyfully & Joyfully @ Work</em> — not as a wellness brand, but as a personal mission. I wanted to feel better. I began researching what the body and brain actually need to heal: morning light, intentional movement, gratitude, darkness at night, the kind of rituals that seem almost too simple to matter.
+          </p>
+          <p class="reveal">
+            So I started doing them. Every morning. Tracked with my Apple Watch.
+          </p>
+          <div class="founder-pullquote reveal">
+            <div class="fpq-bar"></div>
+            <p>"Smiling for ten seconds in the morning — genuinely, fully — is one of the simplest things I do. And it works."</p>
+          </div>
+          <p class="reveal">
+            Over time, something shifted. My fitness improved. My sleep deepened. My mood lifted. My skin changed. And then — for the first time in seventeen years — my <strong>Anti-Dopamine Receptor D1 titer level</strong>, measured by the Cunningham Panel (now the Autoimmune Brain Panel), dropped. The data confirmed what I was already feeling.
+          </p>
+          <p class="reveal">
+            The rituals worked. The watch data proved it.
+          </p>
+          <p class="reveal">
+            Joyfully exists because I believe this practice shouldn't be a secret. It shouldn't take a health crisis to discover it. Everyone deserves a tool that makes these rituals visible, trackable, and meaningful — right from their wrist.
+          </p>
+          <p class="reveal" style="color:rgba(255,255,255,0.55);">
+            This is not a wellness trend. This is lived experience, backed by biomarker data, built into an app — so you don't have to figure it out the hard way.
+          </p>
+        </div>
+
+        <div class="founder-sig reveal">
+          <div class="founder-sig-line"></div>
+          <div class="founder-sig-name">Founder, Joyfully</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ WAITLIST ═══════════ -->
+<section class="waitlist-section" id="waitlist">
+  <div class="waitlist-glow"></div>
+  <div class="waitlist-card reveal">
+    <h2>Be first to<br><em>rise with us</em></h2>
+    <p>Joyfully is coming to Apple Watch. Join the waitlist for early access, launch pricing, and a first look at the full app.</p>
+    <form class="waitlist-form" id="waitlistForm" action="https://app.kit.com/forms/2715f7dd47/subscriptions" method="POST" target="kitFrame" onsubmit="handleWaitlistSubmit(event)">
+      <input type="hidden" name="api_key" value="2715f7dd47" />
+      <input type="hidden" name="redirect_to" value="https://app.kit.com/confirm-subscription" />
+      <input class="waitlist-input" type="email" name="email_address" id="emailInput" placeholder="your@email.com" required />
+      <button class="waitlist-btn" type="submit">Join Waitlist</button>
+    </form>
+    <iframe name="kitFrame" style="display:none;" aria-hidden="true"></iframe>
+    <div class="waitlist-success" id="waitlistSuccess">
+      <div class="check">☀️</div>
+      <h3>You're on the list!</h3>
+      <p>Check your inbox to confirm your spot — then your sun starts rising.</p>
+    </div>
+    <p class="waitlist-count"><strong id="waitlistNum">247</strong> people have already joined</p>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <div class="footer-logo">Joyfully</div>
+  <div class="footer-links">
+    <a href="#demo">The App</a>
+    <a href="#features">Features</a>
+    <a href="#rituals">Rituals</a>
+    <a href="#waitlist">Waitlist</a>
+  </div>
+  <div class="footer-copy">© 2025 Joyfully. All rights reserved.</div>
+</footer>
+
+<script>
+// ══ Cursor ══
+const cur = document.getElementById('cursor');
+const curR = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button,.wstab,.ndot,.spai,.supc,.shbtn,.jbtn,.supshop').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.classList.add('hovering');curR.classList.add('hovering');});
+  el.addEventListener('mouseleave',()=>{cur.classList.remove('hovering');curR.classList.remove('hovering');});
+});
+
+// ══ Nav scroll ══
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY>60);
+});
+
+// ══ Hero rays ══
+(function(){
+  const ring=document.getElementById('heroRays');
+  for(let i=0;i<18;i++){
+    const angle=(360/18)*i, len=80+Math.random()*60;
+    const r=document.createElement('div'); r.className='hero-ray';
+    r.style.cssText=`width:2px;height:${len}px;left:-1px;top:${-len}px;transform:rotate(${angle}deg);transform-origin:1px ${len}px;opacity:${0.15+Math.random()*0.2}`;
+    ring.appendChild(r);
+  }
+})();
+
+// ══ Scroll reveals ══
+const revealObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.15});
+document.querySelectorAll('.reveal,.feat-card,.ritual-step,.wf-item,.fdp').forEach(el=>revealObs.observe(el));
+
+// ══ Staggered feat cards ══
+document.querySelectorAll('.feat-card').forEach((c,i)=>{
+  c.style.transitionDelay=`${i*0.08}s`;
+});
+
+// ══ Watch ══
+let steps=4280, stepGoal=10000;
+const rituals=[false,false,false,false];
+const spaCounts={s:2,c:1,i:0,r:3}, spaLogged={s:false,c:false,i:false,r:false};
+let smileDone=false, smileTimer=null, smileCount=10;
+let gSecs=754;
+
+function buildRays(size){
+  const ring=document.getElementById('wRayRing');
+  ring.innerHTML='';
+  ring.style.cssText=`width:${size*3}px;height:${size*3}px;margin-left:${-size*1.5}px;margin-top:${-size*1.5}px;top:50%;left:50%;`;
+  for(let i=0;i<14;i++){
+    const angle=(360/14)*i, len=size*0.7+(i%3)*size*0.18;
+    const ray=document.createElement('div'); ray.className='wh-ray';
+    ray.style.cssText=`width:2px;height:${len}px;left:${size*1.5-1}px;top:${size*1.5-len}px;transform:rotate(${angle}deg);transform-origin:center bottom;opacity:${0.28+Math.random()*0.35}`;
+    ring.appendChild(ray);
+  }
+}
+
+function updateWatch(){
+  const pct=Math.min(steps/stepGoal,1);
+  const size=22+pct*58;
+  const core=document.getElementById('wSunCore');
+  core.style.width=size+'px'; core.style.height=size+'px';
+  buildRays(size);
+  document.getElementById('wStepFill').style.width=(pct*100)+'%';
+  document.getElementById('wStepTxt').textContent=steps.toLocaleString()+' / '+stepGoal.toLocaleString()+' steps';
+  const done=rituals.filter(Boolean).length;
+  document.getElementById('wFog').style.opacity=Math.max(0,1-done*0.26);
+  for(let i=0;i<4;i++) document.getElementById('wd'+i).classList.toggle('lit',rituals[i]);
+}
+
+setInterval(()=>{if(steps<10000){steps+=Math.floor(Math.random()*28+5);updateWatch();}},2500);
+
+function wClock(){
+  const n=new Date();
+  document.getElementById('wClock').textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+}
+wClock(); setInterval(wClock,15000);
+
+setInterval(()=>{
+  gSecs++;
+  const m=Math.floor(gSecs/60),s=gSecs%60;
+  document.getElementById('gTimer').textContent=m+':'+(s<10?'0':'')+s;
+  if(gSecs>=1200&&!rituals[2]){rituals[2]=true;updateWatch();}
+  const c=document.getElementById('gCircle');
+  if(c) c.setAttribute('stroke-dashoffset',213*(1-Math.min(gSecs/1200,1)));
+},1000);
+
+// Stars
+(function(){
+  const box=document.getElementById('slStars');
+  for(let i=0;i<38;i++){
+    const s=document.createElement('div'); s.className='slstar';
+    const sz=1+Math.random()*1.4;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*78}%;--d:${1.8+Math.random()*3}s;--dl:${Math.random()*3}s`;
+    box.appendChild(s);
+  }
+})();
+
+function goScreen(name){
+  document.querySelectorAll('.ws').forEach(s=>{s.classList.remove('active');s.style.display='none';});
+  const t=document.getElementById('ws-'+name);
+  if(t){t.style.display='flex';setTimeout(()=>t.classList.add('active'),10);}
+  document.querySelectorAll('.ndot').forEach(d=>d.classList.toggle('on',d.dataset.ws===name));
+  document.querySelectorAll('.wstab').forEach((b,i)=>{
+    const names=['home','smile','journal','ground','sleep','spa','supps'];
+    b.classList.toggle('active',names[i]===name);
+  });
+  if(name==='home') updateWatch();
+}
+document.addEventListener('click',e=>{
+  const d=e.target.closest('.ndot');
+  if(d&&d.dataset.ws) goScreen(d.dataset.ws);
+});
+updateWatch();
+document.getElementById('ws-home').style.display='flex';
+
+function handleSmile(){
+  if(smileDone) return;
+  if(smileTimer){clearInterval(smileTimer);smileTimer=null;smileCount=10;document.getElementById('smctr').textContent='☀️';document.getElementById('smBtn').textContent='Hold to Confirm ◉';document.getElementById('smcircle').style.strokeDashoffset=188;return;}
+  smileCount=10; document.getElementById('smBtn').textContent='Smiling… tap to cancel';
+  smileTimer=setInterval(()=>{
+    smileCount--;
+    document.getElementById('smcircle').style.strokeDashoffset=188*((smileCount)/10);
+    document.getElementById('smctr').textContent=smileCount>0?smileCount:'✓';
+    if(smileCount<=0){
+      clearInterval(smileTimer);smileTimer=null;smileDone=true;
+      document.getElementById('smBtn').textContent='✓ Smile Confirmed!';
+      document.getElementById('smBtn').style.background='rgba(168,224,168,0.28)';
+      rituals[0]=true;updateWatch();
+      setTimeout(()=>goScreen('home'),1200);
+    }
+  },1000);
+}
+
+function saveJournal(){
+  rituals[1]=true;updateWatch();
+  const btn=document.querySelector('.jbtn');
+  btn.textContent='✓ Saved';btn.style.borderColor='rgba(232,200,154,0.5)';
+  setTimeout(()=>goScreen('home'),1100);
+}
+
+function tSpa(k){
+  spaLogged[k]=!spaLogged[k];
+  if(spaLogged[k]) spaCounts[k]++; else if(spaCounts[k]>0) spaCounts[k]--;
+  document.getElementById('spc-'+k).textContent=spaCounts[k]+'× this week';
+  document.getElementById('spi-'+k).classList.toggle('logged',spaLogged[k]);
+  document.getElementById('spck-'+k).textContent=spaLogged[k]?'✓':'';
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ══ Waitlist — connected to Kit ══
+let waitCount = 247;
+
+function handleWaitlistSubmit(e) {
+  // Don't prevent default — let the form POST to Kit via the hidden iframe
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email || !email.includes('@')) {
+    e.preventDefault();
+    showToast('Please enter a valid email');
+    return;
+  }
+  // Show success state after a short delay (gives Kit time to receive the POST)
+  setTimeout(() => {
+    waitCount++;
+    document.getElementById('waitlistNum').textContent = waitCount;
+    document.getElementById('waitlistForm').style.display = 'none';
+    document.getElementById('waitlistSuccess').style.display = 'block';
+  }, 800);
+}
+
+// Also support Enter key
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('waitlistForm').dispatchEvent(new Event('submit', {bubbles:true, cancelable:true}));
+    document.getElementById('waitlistForm').submit();
+    handleWaitlistSubmit(e);
+  }
+});
+</script>
+</body>
+</html>
